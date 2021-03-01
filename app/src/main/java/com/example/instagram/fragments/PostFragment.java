@@ -7,11 +7,13 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 
 import com.example.instagram.Post;
 import com.example.instagram.PostAdapter;
@@ -29,6 +31,7 @@ public static final String TAG = "PostFragment";
     private RecyclerView rvPost;
     protected PostAdapter adapter;
     protected List<Post> allPosts;
+    private SwipeRefreshLayout swipeContainer;
 
     public PostFragment() {
         // Required empty public constructor
@@ -46,6 +49,21 @@ public static final String TAG = "PostFragment";
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         rvPost = view.findViewById(R.id.rvPost);
+
+        swipeContainer = view.findViewById(R.id.swipeContainer);
+
+        swipeContainer.setColorSchemeResources(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
+
+        swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                Log.i(TAG, "fetching new data");
+                queryPosts();
+            }
+        });
 
         allPosts = new ArrayList<>();
         adapter = new PostAdapter(getContext(), allPosts);
@@ -71,8 +89,11 @@ public static final String TAG = "PostFragment";
                     Log.i(TAG, "Post: " + post.getDescription() + "  username: " + post.getUser().getUsername());
                     //
                 }
-                allPosts.addAll(posts);
-                adapter.notifyDataSetChanged();
+                /*allPosts.addAll(posts);
+                adapter.notifyDataSetChanged();*/
+                adapter.clear();
+                adapter.addAll(posts);
+                swipeContainer.setRefreshing(false);
 
             }
         });
